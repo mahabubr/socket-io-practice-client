@@ -1,23 +1,40 @@
-import logo from './logo.svg';
 import './App.css';
+import io from 'socket.io-client'
+import { useEffect, useState } from 'react';
 
 function App() {
+
+  const socket = io.connect('http://localhost:5000/')
+
+  const [message, setMessage] = useState('')
+  const [getMessage, setGetMessage] = useState('')
+  const [room, setRoom] = useState('')
+
+  const handleSend = () => {
+    socket.emit("reactEvent", { message, room })
+  }
+
+  useEffect(() => {
+    socket.on('showMessage', (data) => {
+      setGetMessage(data.message)
+    })
+  }, [message, getMessage, socket])
+
+  const handleRoom = () => {
+    socket.emit('joinRoom', room)
+  }
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div>
+      <div>
+        <h1>R : {message}</h1>
+        <h1>S : {getMessage}</h1>
+      </div>
+      <input onBlur={(e) => setRoom(e.target.value)} type="text" placeholder='Room' name="" id="" />
+      <button onClick={handleRoom}>Join Room</button>
+      <br />
+      <input onBlur={(e) => setMessage(e.target.value)} type="text" placeholder='Message....' name="" id="" />
+      <button onClick={handleSend}>Send</button>
     </div>
   );
 }
